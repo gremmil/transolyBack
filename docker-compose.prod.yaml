@@ -1,0 +1,43 @@
+version: '3'
+
+services:
+  pokedexapp: # cambiar nombre
+    depends_on:
+      - db
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: pokedex-docker # cambiar nombre
+    container_name: pokedexapp # cambiar nombre
+    restart: always # reiniciar el contenedor si se detiene
+    ports:
+      - '${PORT}:${PORT}'
+    # working_dir: /var/www/pokedex
+    environment:
+      MONGODB: ${MONGODB}
+      PORT: ${PORT}
+    # volumes:
+    #   - ./:/var/www/pokedex
+
+  #db:
+  #  image: mongo:5
+  #  container_name: mongo-poke # cambiar nombre
+  #  restart: always
+  #  ports:
+  #    - 27017:27017
+  #  environment:
+  #    MONGODB_DATABASE: nest-pokemon # cambiar nombre
+  #  volumes:
+  #    - ./mongo:/data/db
+
+  db:
+    image: postgres:14.3
+    container_name: mydb_container
+    restart: always
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - ./postgres:/var/lib/postgresql/data
