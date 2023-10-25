@@ -17,26 +17,31 @@ export class SeedService {
   }
 
   private async insertNewMasters() {
+
     this.mastersService.deleteAllMasters();
     const { companies, events, districts, provinces } = initialData;
-    const insertPromises = [];
-
+    let insertPromises = [];
     companies.forEach(e => {
       insertPromises.push(this.mastersService.createCompany(e));
     });
+    await Promise.all(insertPromises);
 
+    insertPromises = [];
     events.forEach(e => {
       insertPromises.push(this.mastersService.createEvent(e));
     });
+    await Promise.all(insertPromises);
 
+    insertPromises = [];
     districts.forEach(e => {
       insertPromises.push(this.mastersService.createDistrict(e));
     });
+    await Promise.all(insertPromises);
 
+    insertPromises = [];
     provinces.forEach(e => {
       insertPromises.push(this.mastersService.createProvince(e));
     });
-
     await Promise.all(insertPromises);
 
 
