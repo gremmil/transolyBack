@@ -1,11 +1,11 @@
-import { Consultant } from "src/consultants/entities/consultant.entity";
+import { BaseEntityCustom } from "src/common/entities/base-entity.entity";
 import { Company } from "src/masters/entities/company.entity";
 import { OrderEvent } from "src/order-events/entities/order-event.entity";
 import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn, Unique } from "typeorm";
 
 @Entity({ name: 'orders' })
-@Unique(['orderNumber', 'company'])
-export class Order {
+@Unique(['orderNumber', 'company.id'])
+export class Order extends BaseEntityCustom {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
@@ -17,33 +17,36 @@ export class Order {
   })
   pieces: number;
 
-  @Column('date', {
-    nullable: true,
-  })
-  creationDate: Date;
+  @Column('text')
+  consultantCode: string;
 
-  @Column('date', {
-    nullable: true,
-  })
-  updateDate: Date;
+  @Column('text')
+  consultantName: string;
 
+  @Column('text')
+  consultantPhone: string;
+
+  @Column('text')
+  address: string;
+
+  @Column('text')
+  latitude: string;
+
+  @Column('text')
+  longitude: string;
+
+  @OneToMany(
+    () => OrderEvent,
+    (orderevent) => orderevent.order,
+    { cascade: true, eager: true, lazy: true },
+  )
+  orderevents: Array<OrderEvent>
 
   @ManyToOne(
     () => Company,
     (company) => company.orders,
+    { onDelete: 'CASCADE', lazy: true, nullable: false },
   )
-  company: Company;
-
-  @ManyToOne(
-    () => Consultant,
-    (consultant) => consultant.orders,
-  )
-  consultant: Consultant;
-
-  @OneToMany(
-    () => OrderEvent,
-    (orderevent) => orderevent.order
-  )
-  orderevents: Array<OrderEvent>
+  company: Company
 
 }

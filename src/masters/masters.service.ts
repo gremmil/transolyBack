@@ -3,7 +3,7 @@ import { CreateCompanyDto, CreateDistrictDto, CreateEventDto, CreateMasterDto, C
 import { UpdateMasterDto } from './dto/update-master.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Company } from './entities/company.entity';
-import { Repository } from 'typeorm';
+import { DataSource, QueryRunner, Repository, getConnection } from 'typeorm';
 import { District } from './entities/district.entity';
 import { Province } from './entities/province.entity';
 import { Event } from './entities/event.entity';
@@ -20,48 +20,100 @@ export class MastersService {
     private readonly districtRepository: Repository<District>,
     @InjectRepository(Province)
     private readonly provinceRepository: Repository<Province>,
-  ) { }
+  ) {
+  }
 
   create(createMasterDto: CreateMasterDto) {
     return 'This action adds a new master';
   }
   async createCompany(dto: CreateCompanyDto) {
-    const item = this.companyRepository.create({
-      description: dto.description
-    });
-    return await this.companyRepository.save(item);
+    try {
+      const item = this.companyRepository.create({
+        id: dto.id,
+        description: dto.description,
+        container: dto.container
+      });
+      return await this.companyRepository.save(item);
+    } catch (error) {
+      throw error;
+    }
   }
   async createEvent(dto: CreateEventDto) {
-    const item = this.eventRepository.create({
-      description: dto.description
-    });
-    return await this.eventRepository.save(item);
+    try {
+      const item = this.eventRepository.create({
+        id: dto.id,
+        description: dto.description,
+        showInWeb: dto.showInWeb
+      });
+      return await this.eventRepository.save(item);
+    } catch (error) {
+      throw error;
+    }
   }
   async createDistrict(dto: CreateDistrictDto) {
-    const item = this.districtRepository.create({
-      description: dto.description
-    });
-    return await this.districtRepository.save(item);
+    try {
+      const item = this.districtRepository.create({
+        id: dto.id,
+        description: dto.description
+      });
+      return await this.districtRepository.save(item);
+    } catch (error) {
+      throw error;
+    }
   }
   async createProvince(dto: CreateProvinceDto) {
-    const item = this.provinceRepository.create({
-      description: dto.description
-    });
-    return await this.provinceRepository.save(item);
+    try {
+      const item = this.provinceRepository.create({
+        id: dto.id,
+        description: dto.description
+      });
+      return await this.provinceRepository.save(item);
+    } catch (error) {
+      throw error;
+    }
   }
 
   findAll() {
     return `This action returns all masters`;
   }
   async findAllCompanies() {
-    return await this.companyRepository.find({});
+    try {
+      const list = await this.companyRepository.find({});
+      return list.map(({ id, description }) => ({ id, description }))
+    } catch (error) {
+      throw error;
+    }
   }
   async findAllEvents() {
-    return await this.eventRepository.find({});
+    try {
+      const list = await this.eventRepository.find({});
+      return list.reduce((acc, { id, description, showInWeb }) => {
+        if (showInWeb) {
+          acc.push({ id, description });
+        }
+        return acc;
+      }, []);
+    } catch (error) {
+      throw error;
+    }
   }
 
   findOne(id: number) {
-    return `This action returns a #${id} master`;
+    return ``;
+  }
+  async findOneCompany(id: number) {
+    try {
+      return await this.companyRepository.findOneBy({ id });
+    } catch (error) {
+      throw error;
+    }
+  }
+  async findOneEvent(id: number) {
+    try {
+      return await this.eventRepository.findOneBy({ id });
+    } catch (error) {
+      throw error
+    }
   }
 
   update(id: number, updateMasterDto: UpdateMasterDto) {
@@ -71,25 +123,4 @@ export class MastersService {
   remove(id: number) {
     return `This action removes a #${id} master`;
   }
-
-  async deleteAllMasters() {
-    const queryCompany = this.companyRepository.createQueryBuilder('company');
-    const queryEvent = this.eventRepository.createQueryBuilder('event');
-    const queryDistrict = this.districtRepository.createQueryBuilder('district');
-    const queryProvince = this.provinceRepository.createQueryBuilder('province');
-
-    try {
-      await queryCompany.delete().where({}).execute();
-      await queryEvent.delete().where({}).execute();
-      await queryDistrict.delete().where({}).execute();
-      await queryProvince.delete().where({}).execute();
-
-      return;
-    } catch (error) {
-      console.error('Error al eliminar los registros:', error);
-      throw new Error('Error al eliminar los registros');
-    }
-
-  }
-
 }

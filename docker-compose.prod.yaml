@@ -32,7 +32,7 @@ services:
 
   db:
     image: postgres:14.3
-    container_name: mydb_container
+    container_name: transolyfer_db_container
     restart: always
     ports:
       - '5432:5432'

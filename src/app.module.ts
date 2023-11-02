@@ -6,7 +6,6 @@ import { SeedModule } from './seed/seed.module';
 import { OrdersModule } from './orders/orders.module';
 import { MastersModule } from './masters/masters.module';
 import { UsersModule } from './users/users.module';
-import { ConsultantsModule } from './consultants/consultants.module';
 import { OrderEventsModule } from './order-events/order-events.module';
 
 @Module({
@@ -20,16 +19,14 @@ import { OrderEventsModule } from './order-events/order-events.module';
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
       autoLoadEntities: true,
-      synchronize: true
+      synchronize: true,
     }),
     CommonModule,
     SeedModule,
     OrdersModule,
+    OrderEventsModule,
     MastersModule,
     UsersModule,
-    ConsultantsModule,
-    OrderEventsModule,
-    OrderEventsModule
   ],
   controllers: [],
   providers: [],

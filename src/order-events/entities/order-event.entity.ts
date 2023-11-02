@@ -1,11 +1,13 @@
+import { ValidateNested } from "class-validator";
+import { BaseEntityCustom } from "src/common/entities/base-entity.entity";
 import { Event } from "src/masters/entities/event.entity";
 import { Order } from "src/orders/entities/order.entity";
 import { User } from "src/users/entities/user.entity";
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn, Unique } from "typeorm";
 
-@Entity({ name: 'orders' })
-
-export class OrderEvent {
+@Entity({ name: 'order-events' })
+@Unique(['order.id', 'event.id'])
+export class OrderEvent extends BaseEntityCustom {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
@@ -13,10 +15,10 @@ export class OrderEvent {
   observations: string;
 
   @Column('text')
-  mainPhotoUrl: string;
+  mainImageUrl: string;
 
   @Column('text')
-  referencePhotoUrl: string;
+  referenceImageUrl: string;
 
 
   @Column('text')
@@ -25,31 +27,25 @@ export class OrderEvent {
   @Column('text')
   latitude: string;
 
-  @Column('date')
-  creationDate: Date;
-
-  @Column('date', {
-    nullable: true,
-  })
-  updateDate: Date;
-
-
   @ManyToOne(
     () => Order,
-    (order) => order.orderevents
+    (order) => order.orderevents,
+    { onDelete: 'CASCADE', lazy: true, nullable: false }
   )
   order: Order;
 
   @ManyToOne(
     () => Event,
-    (event) => event.orderevents
+    (event) => event.orderevents,
+    { onDelete: 'CASCADE', lazy: true, nullable: false },
   )
+  @ValidateNested({ always: true })
   event: Event;
-
 
   @ManyToOne(
     () => User,
-    (user) => user.orderevents
+    (user) => user.orderevents,
+    { onDelete: 'CASCADE', lazy: true },
   )
   user: User;
 
