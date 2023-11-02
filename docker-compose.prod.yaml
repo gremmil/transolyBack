@@ -1,23 +1,23 @@
 version: '3'
 
 services:
-  pokedexapp: # cambiar nombre
+  transolyapp: # cambiar nombre
     depends_on:
       - db
     build:
       context: .
       dockerfile: Dockerfile
-    image: pokedex-docker # cambiar nombre
-    container_name: pokedexapp # cambiar nombre
+    image: transoly-docker # cambiar nombre
+    container_name: transolyapp # cambiar nombre
     restart: always # reiniciar el contenedor si se detiene
     ports:
       - '${PORT}:${PORT}'
-    # working_dir: /var/www/pokedex
+    # working_dir: /var/www/transoly
     environment:
       MONGODB: ${MONGODB}
       PORT: ${PORT}
     # volumes:
-    #   - ./:/var/www/pokedex
+    #   - ./:/var/www/transoly
 
   #db:
   #  image: mongo:5
