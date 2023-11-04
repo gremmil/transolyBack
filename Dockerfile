@@ -1,20 +1,42 @@
-# Establecer la imagen base
-FROM node:14-alpine
-
-# Establecer el directorio de trabajo
+# Install dependencies only when needed
+FROM node:20-alpine3.18 AS deps
+# Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine to understand why libc6-compat might be needed.
+RUN apk add --no-cache libc6-compat
 WORKDIR /app
+COPY package*.json ./
+RUN npm install --frozen-lockfile
 
-# Copiar los archivos de la aplicación
+# Build the app with cache dependencies
+FROM node:20-alpine3.18 AS builder
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+RUN npm run build
+
+
+# Production image, copy all the files and run next
+FROM node:20-alpine3.18 AS runner
+
+# Set working directory
+WORKDIR /usr/src/app
+
 COPY package*.json ./
 
-# Instalar las dependencias
-RUN npm install --production
+RUN npm install --prod
 
-# Copiar el código fuente de la aplicación
-COPY . .
+COPY --from=builder /app/dist ./dist
 
-# Exponer el puerto en el que se ejecuta tu aplicación
+# # Copiar el directorio y su contenido
+# RUN mkdir -p ./pokedex
+
+# COPY --from=builder ./app/dist/ ./app
+# COPY ./.env ./app/.env
+
+# # Dar permiso para ejecutar la applicación
+# RUN adduser --disabled-password pokeuser
+# RUN chown -R pokeuser:pokeuser ./pokedex
+# USER pokeuser
+
 EXPOSE 3000
 
-# Comando para iniciar la aplicación
-CMD [ "npm", "start" ]
+CMD [ "node","dist/main" ]
