@@ -1,4 +1,15 @@
-import { ExceptionFilter, Catch, ArgumentsHost, HttpException, HttpStatus, BadRequestException, HttpExceptionBody, NotFoundException } from '@nestjs/common';
+import {
+  ExceptionFilter,
+  Catch,
+  ArgumentsHost,
+  HttpException,
+  HttpStatus,
+  BadRequestException,
+  HttpExceptionBody,
+  NotFoundException,
+  UnprocessableEntityException,
+  PayloadTooLargeException,
+} from '@nestjs/common';
 import { Request, Response } from 'express';
 import { ValidationError } from 'class-validator';
 
@@ -25,20 +36,25 @@ export class HttpExceptionFilter implements ExceptionFilter {
     let errorResponse: HttpExceptionBody = {
       message: [],
       error: 'Internal Server Error',
-      statusCode: 500
+      statusCode: 500,
     };
 
-    if (exception instanceof HttpException && exception.getResponse() instanceof Array) {
+    if (
+      exception instanceof HttpException &&
+      exception.getResponse() instanceof Array
+    ) {
       const validationErrors = exception.getResponse() as ValidationError[];
       errorResponse.message = this.formatValidationErrors(validationErrors);
     }
-    if (exception instanceof BadRequestException) {
-      const { message, error, statusCode } = exception.getResponse() as HttpExceptionBody;
-      errorResponse = { message, error, statusCode };
-    }
-
-    if (exception instanceof NotFoundException) {
-      const { message, error, statusCode } = exception.getResponse() as HttpExceptionBody;
+    if (
+      exception instanceof
+      BadRequestException ||
+      NotFoundException ||
+      UnprocessableEntityException ||
+      PayloadTooLargeException
+    ) {
+      const { message, error, statusCode } =
+        exception.getResponse() as HttpExceptionBody;
       errorResponse = { message, error, statusCode };
     }
 

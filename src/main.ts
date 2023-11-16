@@ -4,7 +4,6 @@ import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { PostgresExceptionFilter } from './filters/postgres-exception.filter';
 import { HttpExceptionFilter } from './filters/http-exception.filter';
-import { env } from 'process';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -12,7 +11,8 @@ async function bootstrap() {
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
-      forbidNonWhitelisted: true
+      forbidNonWhitelisted: true,
+      validateCustomDecorators: true,
     }),
   );
   app.useGlobalFilters(new HttpExceptionFilter(), new PostgresExceptionFilter());

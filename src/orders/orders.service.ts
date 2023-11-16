@@ -47,9 +47,10 @@ export class OrdersService {
   async create(dto: CreateOrderDto) {
     try {
       const { companyId, ...detailsOrder } = dto;
-      const itemCreated = await this.orderRepository.create({
+      const itemCreated = this.orderRepository.create({
         ...detailsOrder,
-        company: await this.mastersService.findOneCompany(companyId)
+        company: await this.mastersService.findOneCompany(companyId),
+        orderevents: []
       });
       const itemSaved = await this.orderRepository.save(itemCreated);
       const initOrderEvents: Array<CreateOrderEventDto> = [

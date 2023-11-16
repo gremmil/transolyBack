@@ -67,13 +67,13 @@ export const initialData: SeedData = {
     { id: 14, description: "Pendiente de entrega", showInWeb: true }
   ],
   companies: [
-    { id: 1, description: "NATURA", container: "contenedor-natura" },
-    { id: 2, description: "MARY KAY", container: "contenedor-mk" },
-    { id: 3, description: "ZONIA", container: "contenedor-zonia" },
-    { id: 4, description: "BELCORP", container: "contenedor-belcorp" },
-    { id: 5, description: "BE SIFRAH", container: "contenedor-besifrah" },
-    { id: 6, description: "BAGUÉS", container: "contenedor-bagues" },
-    { id: 7, description: "TU CALZADOO", container: "contenedor-tucalzado" }
+    { id: 1, description: "NATURA", container: "natura-folder" },
+    { id: 2, description: "MARY KAY", container: "marykay-folder" },
+    { id: 3, description: "ZONIA", container: "zonia-folder" },
+    { id: 4, description: "BELCORP", container: "belcorp-folder" },
+    { id: 5, description: "BE SIFRAH", container: "besifrah-folder" },
+    { id: 6, description: "BAGUÉS", container: "bagues-folder" },
+    { id: 7, description: "TU CALZADOO", container: "tucalzado-folder" }
   ],
   provinces: [
     { id: 1, description: 'Province1' },

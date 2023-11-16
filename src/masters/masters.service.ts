@@ -3,14 +3,13 @@ import { CreateCompanyDto, CreateDistrictDto, CreateEventDto, CreateMasterDto, C
 import { UpdateMasterDto } from './dto/update-master.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Company } from './entities/company.entity';
-import { DataSource, QueryRunner, Repository, getConnection } from 'typeorm';
+import { Repository } from 'typeorm';
 import { District } from './entities/district.entity';
 import { Province } from './entities/province.entity';
 import { Event } from './entities/event.entity';
 
 @Injectable()
 export class MastersService {
-
   constructor(
     @InjectRepository(Company)
     private readonly companyRepository: Repository<Company>,
@@ -28,24 +27,26 @@ export class MastersService {
   }
   async createCompany(dto: CreateCompanyDto) {
     try {
-      const item = this.companyRepository.create({
+      const itemCreated = this.companyRepository.create({
         id: dto.id,
         description: dto.description,
         container: dto.container
       });
-      return await this.companyRepository.save(item);
+      const itemSaved = await this.companyRepository.save(itemCreated);
+      return itemSaved;
     } catch (error) {
       throw error;
     }
   }
   async createEvent(dto: CreateEventDto) {
     try {
-      const item = this.eventRepository.create({
+      const itemCreated = this.eventRepository.create({
         id: dto.id,
         description: dto.description,
         showInWeb: dto.showInWeb
       });
-      return await this.eventRepository.save(item);
+      const itemSaved = await this.eventRepository.save(itemCreated);
+      return itemSaved;
     } catch (error) {
       throw error;
     }
@@ -78,7 +79,7 @@ export class MastersService {
   }
   async findAllCompanies() {
     try {
-      const list = await this.companyRepository.find({});
+      const list = await this.companyRepository.find({ select: { id: true, description: true } },);
       return list.map(({ id, description }) => ({ id, description }))
     } catch (error) {
       throw error;

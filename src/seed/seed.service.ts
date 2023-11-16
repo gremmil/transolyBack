@@ -23,7 +23,6 @@ export class SeedService {
   ) { }
   async executeSeed() {
     await this.deleteAllData();
-    //await this.insertAllData();
     await this.insertMasters();
     await this.insertUsers();
     await this.insertOrders();
@@ -112,29 +111,6 @@ export class SeedService {
   private async insertOrders() {
     const { orders } = initialData;
 
-    orders.forEach(async (e) => {
-      await this.ordersService.create(e);
-    })
-    return true;
-  }
-
-  private async insertAllData() {
-    const { companies, events, districts, provinces, users, orders } = initialData;
-    companies.forEach(async (e) => {
-      await this.mastersService.createCompany(e);
-    });
-    events.forEach(async (e) => {
-      await this.mastersService.createEvent(e);
-    });
-    districts.forEach(async (e) => {
-      await this.mastersService.createDistrict(e);
-    });
-    provinces.forEach(async (e) => {
-      await this.mastersService.createProvince(e);
-    });
-    users.forEach(async (e) => {
-      await this.usersService.create(e);
-    })
     orders.forEach(async (e) => {
       await this.ordersService.create(e);
     })
