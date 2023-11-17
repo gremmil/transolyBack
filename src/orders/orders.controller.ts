@@ -26,9 +26,8 @@ export class OrdersController {
 
   @ApiOperation({ summary: 'Obtener Pedido por id/numero_orden/empresa_id' })
   @Get('getOne')
-  async findOne(@Query() query: FindOneOrderDto) {
-    const order = await this.ordersService.findOne(query);
-    return instanceToPlain(order, { excludePrefixes: ['__'] });
+  findOne(@Query() query: FindOneOrderDto) {
+    return this.ordersService.findOne(query);
   }
 
   @ApiOperation({ summary: 'Actualizar Pedido' })

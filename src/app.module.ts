@@ -25,6 +25,7 @@ import { OrderEventsModule } from './order-events/order-events.module';
       password: process.env.DB_PASSWORD,
       autoLoadEntities: true,
       synchronize: true,
+      entityPrefix: ''
     }),
     CommonModule,
     SeedModule,

@@ -34,11 +34,10 @@ export class OrderEventsController {
 
   @Post()
   @ApiOperation({ summary: 'Crear Evento del Pedido' })
-  async create(
+  create(
     @Body() body: CreateOrderEventDto,
   ) {
-    const orderEvent = await this.orderEventsService.create(body);
-    return instanceToPlain(orderEvent, { excludePrefixes: ['__'] });
+    return this.orderEventsService.create(body);
   }
 
   @Get('getAll/:userId')
@@ -59,12 +58,11 @@ export class OrderEventsController {
 
   @Patch(':id')
   @ApiOperation({ summary: 'Actualizar Pedido' })
-  async update(
+  update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateOrderEventDto: UpdateOrderEventDto,
   ) {
-    const orderEvent = await this.orderEventsService.update(id, updateOrderEventDto);
-    return instanceToPlain(orderEvent, { excludePrefixes: ['__'] });
+    return this.orderEventsService.update(id, updateOrderEventDto);
   }
 
   @Delete(':id')
