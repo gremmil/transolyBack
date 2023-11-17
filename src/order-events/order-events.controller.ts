@@ -20,12 +20,9 @@ import { CreateOrderEventDto } from './dto/create-order-event.dto';
 import { UpdateOrderEventDto } from './dto/update-order-event.dto';
 import { FindOneOrderEventDto } from './dto/find-one-order-event.dto';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { FileFieldsInterceptor, FileInterceptor } from '@nestjs/platform-express';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { S3Service } from 'src/common/services/s3.service';
-import { FilesOrderEventDto } from './dto/files-order-event.dto';
-import { fileFilter } from './helpers/fileFilter.helper';
-import { isBase64 } from 'class-validator';
-import { Test } from '@nestjs/testing';
+import { instanceToPlain } from 'class-transformer';
 
 @ApiTags('OrdersEvents')
 @Controller('order-events')
@@ -37,10 +34,11 @@ export class OrderEventsController {
 
   @Post()
   @ApiOperation({ summary: 'Crear Evento del Pedido' })
-  create(
+  async create(
     @Body() body: CreateOrderEventDto,
   ) {
-    return this.orderEventsService.create(body);
+    const orderEvent = await this.orderEventsService.create(body);
+    return instanceToPlain(orderEvent, { excludePrefixes: ['__'] });
   }
 
   @Get('getAll/:userId')
@@ -61,11 +59,12 @@ export class OrderEventsController {
 
   @Patch(':id')
   @ApiOperation({ summary: 'Actualizar Pedido' })
-  update(
+  async update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateOrderEventDto: UpdateOrderEventDto,
   ) {
-    return this.orderEventsService.update(id, updateOrderEventDto);
+    const orderEvent = await this.orderEventsService.update(id, updateOrderEventDto);
+    return instanceToPlain(orderEvent, { excludePrefixes: ['__'] });
   }
 
   @Delete(':id')

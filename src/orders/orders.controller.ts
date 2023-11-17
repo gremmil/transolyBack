@@ -5,6 +5,7 @@ import { UpdateOrderDto } from './dto/update-order.dto';
 import { FindOneOrderDto } from './dto/find-one-order.dto';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { classToPlain, instanceToPlain } from 'class-transformer';
 
 @ApiTags('Orders')
 @Controller('orders')
@@ -25,8 +26,9 @@ export class OrdersController {
 
   @ApiOperation({ summary: 'Obtener Pedido por id/numero_orden/empresa_id' })
   @Get('getOne')
-  findOne(@Query() query: FindOneOrderDto) {
-    return this.ordersService.findOne(query);
+  async findOne(@Query() query: FindOneOrderDto) {
+    const order = await this.ordersService.findOne(query);
+    return instanceToPlain(order, { excludePrefixes: ['__'] });
   }
 
   @ApiOperation({ summary: 'Actualizar Pedido' })
