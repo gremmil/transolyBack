@@ -5,7 +5,6 @@ import {
 } from '@nestjs/common';
 import { CreateOrderEventDto } from './dto/create-order-event.dto';
 import { UpdateOrderEventDto } from './dto/update-order-event.dto';
-import { OrderEvent } from './entities/order-event.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, FindOneOptions, Repository } from 'typeorm';
 import { MastersService } from 'src/masters/masters.service';
@@ -17,6 +16,8 @@ import { isBase64 } from 'class-validator';
 import { base64ToBlob } from './helpers/fileConverter.helper';
 import { Event } from 'src/masters/entities/event.entity';
 import { Company } from 'src/masters/entities/company.entity';
+import { BodyFilesOrderEventDto, FilesOrderEventDto } from './dto/files-order-event.dto';
+import { OrderEvent } from './entities/order-event.entity';
 
 @Injectable()
 export class OrderEventsService {
@@ -63,15 +64,6 @@ export class OrderEventsService {
       if (isOrderFinished) {
         throw new BadRequestException('The order is already finalized.');
       } else {
-        const order = await queryRunner.manager
-          .getRepository(Order)
-          .findOne({
-            where: { id: orderId },
-            relations: { company: true },
-            select: { id: true, orderNumber: true },
-            loadEagerRelations: false,
-          });
-
         let itemCreated = this.orderEventRepository.create({
           ...detailsOrderEvent,
           event: await queryRunner.manager
@@ -81,7 +73,7 @@ export class OrderEventsService {
               select: { id: true, description: true },
               loadEagerRelations: false,
             }),
-          order: { id: order.id },
+          order: { id: orderId },
         });
 
         if (userId) {
@@ -91,41 +83,6 @@ export class OrderEventsService {
             loadEagerRelations: false,
           });
         }
-        const { mainImageUrl, referenceImageUrl } = dto;
-        if (mainImageUrl || referenceImageUrl) {
-          const order = await queryRunner.manager
-            .getRepository(Order)
-            .findOne({
-              where: { id: orderId },
-              relations: { company: true },
-              select: { id: true, orderNumber: true },
-              loadEagerRelations: false,
-            });
-
-          const company = await queryRunner.manager
-            .getRepository(Company)
-            .findOne({
-              where: { id: order.company.id },
-              select: { id: true, description: true, container: true },
-              loadEagerRelations: false,
-            });
-
-          itemCreated.mainImageUrl = await this.handlerFilesToUpload(
-            mainImageUrl,
-            eventId,
-            order,
-            'mainPhoto',
-            company
-          );
-          itemCreated.referenceImageUrl = await this.handlerFilesToUpload(
-            referenceImageUrl,
-            eventId,
-            order,
-            'refPhoto',
-            company
-          );
-        }
-
         const itemSaved = await this.orderEventRepository.save(itemCreated);
         await queryRunner.commitTransaction();
         await queryRunner.release();
@@ -166,42 +123,7 @@ export class OrderEventsService {
             select: { id: true, userName: true },
           });
       }
-      const { mainImageUrl, referenceImageUrl } = dto;
-      if (mainImageUrl || referenceImageUrl) {
-        const order = await queryRunner.manager
-          .getRepository(Order)
-          .findOne({
-            where: { id: orderId },
-            relations: { company: true },
-            select: { id: true, orderNumber: true },
-            loadEagerRelations: false,
-          });
-        const company = await queryRunner.manager
-          .getRepository(Company)
-          .findOne({
-            where: { id: order.company.id },
-            select: { id: true, description: true, container: true },
-            loadEagerRelations: false,
-          });
-
-        itemUpdated.mainImageUrl = await this.handlerFilesToUpload(
-          mainImageUrl,
-          eventId,
-          order,
-          'mainPhoto',
-          company
-        );
-        itemUpdated.referenceImageUrl = await this.handlerFilesToUpload(
-          referenceImageUrl,
-          eventId,
-          order,
-          'refPhoto',
-          company
-        );
-      }
-
       const itemSaved = await this.orderEventRepository.save(itemUpdated);
-
       await queryRunner.commitTransaction();
       await queryRunner.release();
       return itemSaved;
@@ -262,26 +184,52 @@ export class OrderEventsService {
     await this.orderEventRepository.remove(product);
   }
 
-  async handlerFilesToUpload(
-    img: string,
-    eventId: number,
-    order: Order,
-    type: 'mainPhoto' | 'refPhoto',
-    companie: Company
-  ) {
-    if (img && isBase64(img)) {
-      const folder = companie?.container;
+  async uploadFiles(files: FilesOrderEventDto, orderEventId: string) {
+    const queryRunner = await this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    try {
+      const { mainImage, referenceImage } = files;
+      const orderEvent = await queryRunner.manager
+        .getRepository(OrderEvent)
+        .findOne({
+          where: { id: orderEventId },
+          relations: { order: { company: true, orderevents: false }, event: true, },
+          select: { order: { orderNumber: true, company: { container: true }, orderevents: false } },
+        });
+      const { company, orderNumber, id: orderId } = orderEvent.order;
+      const { id: eventId } = orderEvent.event;
+      const { container } = company;
+      const folder = container || 'contenedor-error';
       let filesToUpload = {};
-      const key = `${folder || 'contenedor-error'}/${order.orderNumber || order.id
-        }/event_${eventId || 0}/${type}`;
-      filesToUpload[key] = base64ToBlob(img, 'image/jpeg');
-      const locations = await this.s3.uploadFile(
-        key,
-        base64ToBlob(img, 'image/jpeg'),
-      );
-      return locations;
-    } else {
-      return img;
+      const mainImageKey = `${folder}/${orderNumber || orderId
+        }/event_${eventId || 0}/mainImage`;
+      const referenceImageKey = `${folder}/${orderNumber || orderId
+        }/event_${eventId || 0}/referenceImage`;
+      filesToUpload[mainImageKey] = new Blob([mainImage[0].buffer], { type: mainImage[0].mimetype });
+      filesToUpload[referenceImageKey] = new Blob([referenceImage[0].buffer], { type: referenceImage[0].mimetype });
+      const locations = await this.s3.uploadFiles(filesToUpload);
+      orderEvent.mainImageUrl = locations[mainImageKey];
+      orderEvent.referenceImageUrl = locations[referenceImageKey];
+      await queryRunner.commitTransaction();
+      await queryRunner.release();
+      const { observations, mainImageUrl, referenceImageUrl, longitude, latitude, user } = orderEvent;
+      const itemUpdated: UpdateOrderEventDto = {
+        observations,
+        mainImageUrl,
+        referenceImageUrl,
+        longitude,
+        latitude,
+        eventId,
+        orderId,
+      }
+      const itemSaved = await this.update(orderEventId, itemUpdated);
+      return itemSaved;
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      await queryRunner.release();
+      throw error;
     }
+
   }
 }

@@ -84,7 +84,7 @@ export class OrdersService {
     }
   }
 
-  async findAll(dto: PaginationDto) {
+  async findAll(dto: PaginationDto): Promise<Array<Order>> {
     try {
       const { limit = 10, offset = 0 } = dto;
       return await this.orderRepository.find({

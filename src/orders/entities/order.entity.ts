@@ -38,14 +38,14 @@ export class Order extends BaseEntityCustom {
   @OneToMany(
     () => OrderEvent,
     (orderevent) => orderevent.order,
-    { cascade: true, eager: true, lazy: true },
+    { cascade: true, eager: true },
   )
   orderevents: Array<OrderEvent>
 
   @ManyToOne(
     () => Company,
     (company) => company.orders,
-    { onDelete: 'CASCADE', lazy: true, nullable: false },
+    { onDelete: 'CASCADE', nullable: false, },
   )
   company: Company
 

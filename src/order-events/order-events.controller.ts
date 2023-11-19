@@ -13,30 +13,26 @@ import {
   UploadedFiles,
   UseInterceptors,
   PayloadTooLargeException,
-  UploadedFile,
 } from '@nestjs/common';
 import { OrderEventsService } from './order-events.service';
 import { CreateOrderEventDto } from './dto/create-order-event.dto';
 import { UpdateOrderEventDto } from './dto/update-order-event.dto';
 import { FindOneOrderEventDto } from './dto/find-one-order-event.dto';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { S3Service } from 'src/common/services/s3.service';
-import { instanceToPlain } from 'class-transformer';
+import {
+  FileFieldsInterceptor,
+} from '@nestjs/platform-express';
 
 @ApiTags('OrdersEvents')
 @Controller('order-events')
 export class OrderEventsController {
   constructor(
     private readonly orderEventsService: OrderEventsService,
-    private readonly s3: S3Service,
   ) { }
 
   @Post()
   @ApiOperation({ summary: 'Crear Evento del Pedido' })
-  create(
-    @Body() body: CreateOrderEventDto,
-  ) {
+  create(@Body() body: CreateOrderEventDto) {
     return this.orderEventsService.create(body);
   }
 
@@ -71,33 +67,47 @@ export class OrderEventsController {
     return this.orderEventsService.remove(id);
   }
 
+  @Post('upload/:orderEventId')
+  @UseInterceptors(
+    FileFieldsInterceptor([
+      { name: 'mainImage', maxCount: 1 },
+      { name: 'referenceImage', maxCount: 1 },
+    ]),
+  )
 
-  public regex = /^data:image\/(jpeg|jpg|png|gif|webp);base64,([a-zA-Z0-9/+=]+)$/;
-  public maxSize = 10 * 1024 * 1024;
-
-  validateImage(image: string, fieldName: string) {
-    if (!image) {
-      throw new NotFoundException(`File '${fieldName}' is required`);
+  @ApiOperation({ summary: 'Guarda la photo de cargo y referencial en el blob s3 y actualiza el pedido con las url' })
+  uploadFiles(
+    @UploadedFiles() files: { mainImage: Express.Multer.File[], referenceImage: Express.Multer.File[] },
+    @Param('orderEventId') orderEventId: string
+  ) {
+    const allowedTypes = /^image\/(jpeg|jpg|png|gif)$/;
+    const maxSize = 10 * 1024 * 1024;
+    try {
+      this.validateFile(files.mainImage, allowedTypes, maxSize, 'mainImage');
+      this.validateFile(files.referenceImage, allowedTypes, maxSize, 'referenceImage');
+      return this.orderEventsService.uploadFiles(files, orderEventId);
+    } catch (error) {
+      throw error;
     }
-    if (!image.match(/\.(JPG|JPEG|PNG|jpg|jpeg|png)$/)) {
-      if (!image.match(this.regex)) {
-        throw new UnprocessableEntityException(
-          `Only image files are allowed for '${fieldName}': JPG|JPEG|PNG|jpg|jpeg|png`,
-        );
-      }
-      const buffer = Buffer.from(image, 'base64');
-      if (buffer.length > this.maxSize) {
-        throw new PayloadTooLargeException(
-          `The '${fieldName}' file exceeds the maximum size allowed: 10MB`,
-        );
-      }
-    }
-  };
 
-  @Post('upload')
-  @UseInterceptors(FileInterceptor('file'))
-  uploadFile(@UploadedFile() file: Express.Multer.File) {
-    return { file: file.buffer.toString('base64') }
   }
-
+  validateFile(file: Express.Multer.File[], allowedTypes: RegExp, maxSize: number, fileType: string) {
+    try {
+      if (!file) {
+        throw new NotFoundException(`File '${fileType}' is required`);
+      }
+      if (!file[0].mimetype.match(allowedTypes)) {
+        throw new UnprocessableEntityException(
+          `Only image files are allowed for '${fileType}': jpg|jpeg|png`,
+        );
+      }
+      if (file[0].size > maxSize) {
+        throw new PayloadTooLargeException(
+          `The '${fileType}' file exceeds the maximum size allowed: 10MB`,
+        );
+      }
+    } catch (error) {
+      throw error;
+    }
+  }
 }

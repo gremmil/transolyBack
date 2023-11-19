@@ -1,8 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNumber, IsObject, IsOptional, IsString, IsUUID } from 'class-validator';
-import { IsBase64Custom } from 'src/common/helpers/class-validators/base64-custom';
-import { CreateOrderDto } from 'src/orders/dto/create-order.dto';
-
+import { IsNumber, IsOptional, IsString, IsUUID } from 'class-validator';
 export class CreateOrderEventDto {
   @ApiProperty({ type: String, example: 'Observaciones del Pedido' })
   @IsString()
@@ -21,14 +18,15 @@ export class CreateOrderEventDto {
 
   @ApiProperty({ example: 'https://www.my-image.blobstorage.com' })
   @IsString()
+  @IsOptional()
   mainImageUrl: string;
 
   @ApiProperty({ example: 'https://www.my-image.blobstorage.com' })
   @IsString()
+  @IsOptional()
   referenceImageUrl: string;
 
   @ApiProperty({ type: String, nullable: true, required: false, example: '99999999' })
-  @IsString()
   @IsUUID()
   orderId: string;
 
@@ -37,7 +35,6 @@ export class CreateOrderEventDto {
   eventId: number;
 
   @ApiProperty({ type: String, example: 'uuid' })
-  @IsString()
   @IsUUID()
   @IsOptional()
   userId?: string;

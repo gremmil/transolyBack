@@ -10,6 +10,6 @@ export class Company extends Master {
   })
   container: string;
 
-  @OneToMany(() => Order, e => e.company, { lazy: true })
+  @OneToMany(() => Order, e => e.company)
   orders: Array<Order>;
 }

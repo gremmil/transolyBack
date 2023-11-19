@@ -30,22 +30,21 @@ export class OrderEvent extends BaseEntityCustom {
   @ManyToOne(
     () => Order,
     (order) => order.orderevents,
-    { onDelete: 'CASCADE', lazy: true, nullable: false }
+    { onDelete: 'CASCADE', nullable: false, eager: false }
   )
   order: Order;
 
   @ManyToOne(
     () => Event,
     (event) => event.orderevents,
-    { onDelete: 'CASCADE', lazy: true, nullable: false },
+    { onDelete: 'CASCADE', nullable: false, },
   )
-  @ValidateNested({ always: true })
   event: Event;
 
   @ManyToOne(
     () => User,
     (user) => user.orderevents,
-    { onDelete: 'CASCADE', lazy: true },
+    { onDelete: 'CASCADE' },
   )
   user: User;
 

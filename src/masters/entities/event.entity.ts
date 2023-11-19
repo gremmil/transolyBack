@@ -10,7 +10,7 @@ export class Event extends Master {
   })
   showInWeb: boolean;
 
-  @OneToMany(() => OrderEvent, orderevent => orderevent.event, { cascade: true, eager: false, lazy: true }
+  @OneToMany(() => OrderEvent, orderevent => orderevent.event, { cascade: true, eager: false }
   )
   orderevents: Array<OrderEvent>;
 }
