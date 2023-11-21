@@ -15,10 +15,10 @@ export class OrderEvent extends BaseEntityCustom {
   observations: string;
 
   @Column('text', { nullable: true })
-  mainImageUrl: string;
+  mainImageURL: string;
 
   @Column('text', { nullable: true })
-  referenceImageUrl: string;
+  referenceImageURL: string;
 
 
   @Column('text', { nullable: true })

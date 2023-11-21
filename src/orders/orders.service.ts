@@ -56,22 +56,22 @@ export class OrdersService {
       const initOrderEvents: Array<CreateOrderEventDto> = [
         {
           eventId: 1,
-          userId: '',
+          userId: null,
           orderId: itemSaved.id,
           latitude: '',
           longitude: '',
-          mainImageUrl: '',
-          referenceImageUrl: '',
+          mainImageURL: '',
+          referenceImageURL: '',
           observations: '',
         },
         {
           eventId: 2,
-          userId: '',
+          userId: null,
           orderId: itemSaved.id,
           latitude: '',
           longitude: '',
-          mainImageUrl: '',
-          referenceImageUrl: '',
+          mainImageURL: '',
+          referenceImageURL: '',
           observations: '',
         }
       ];

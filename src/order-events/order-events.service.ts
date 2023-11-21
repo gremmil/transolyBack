@@ -209,15 +209,15 @@ export class OrderEventsService {
       filesToUpload[mainImageKey] = new Blob([mainImage[0].buffer], { type: mainImage[0].mimetype });
       filesToUpload[referenceImageKey] = new Blob([referenceImage[0].buffer], { type: referenceImage[0].mimetype });
       const locations = await this.s3.uploadFiles(filesToUpload);
-      orderEvent.mainImageUrl = locations[mainImageKey];
-      orderEvent.referenceImageUrl = locations[referenceImageKey];
+      orderEvent.mainImageURL = locations[mainImageKey];
+      orderEvent.referenceImageURL = locations[referenceImageKey];
       await queryRunner.commitTransaction();
       await queryRunner.release();
-      const { observations, mainImageUrl, referenceImageUrl, longitude, latitude, user } = orderEvent;
+      const { observations, mainImageURL, referenceImageURL, longitude, latitude, user } = orderEvent;
       const itemUpdated: UpdateOrderEventDto = {
         observations,
-        mainImageUrl,
-        referenceImageUrl,
+        mainImageURL,
+        referenceImageURL,
         longitude,
         latitude,
         eventId,
