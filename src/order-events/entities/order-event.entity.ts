@@ -14,17 +14,17 @@ export class OrderEvent extends BaseEntityCustom {
   @Column('text')
   observations: string;
 
-  @Column('text')
+  @Column('text', { nullable: true })
   mainImageUrl: string;
 
-  @Column('text')
+  @Column('text', { nullable: true })
   referenceImageUrl: string;
 
 
-  @Column('text')
+  @Column('text', { nullable: true })
   longitude: string;
 
-  @Column('text')
+  @Column('text', { nullable: true })
   latitude: string;
 
   @ManyToOne(
@@ -44,7 +44,7 @@ export class OrderEvent extends BaseEntityCustom {
   @ManyToOne(
     () => User,
     (user) => user.orderevents,
-    { onDelete: 'CASCADE' },
+    { onDelete: 'CASCADE', nullable: true },
   )
   user: User;
 

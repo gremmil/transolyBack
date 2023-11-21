@@ -19,12 +19,12 @@ export class CreateOrderEventDto {
   @ApiProperty({ example: 'https://www.my-image.blobstorage.com' })
   @IsString()
   @IsOptional()
-  mainImageUrl: string;
+  mainImageUrl?: string;
 
   @ApiProperty({ example: 'https://www.my-image.blobstorage.com' })
   @IsString()
   @IsOptional()
-  referenceImageUrl: string;
+  referenceImageUrl?: string;
 
   @ApiProperty({ type: String, nullable: true, required: false, example: '99999999' })
   @IsUUID()
