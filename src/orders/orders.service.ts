@@ -18,6 +18,7 @@ export class OrdersService {
       company: true,
       orderevents: { event: true, user: true },
     },
+    order: { orderevents: { createDate: 'DESC' } },
     select: {
       company: {
         id: true,

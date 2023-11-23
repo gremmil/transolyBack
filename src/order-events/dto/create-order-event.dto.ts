@@ -35,7 +35,7 @@ export class CreateOrderEventDto {
   eventId: number;
 
   @ApiProperty({ type: String, example: 'uuid' })
-  @IsUUID()
   @IsOptional()
+  @IsUUID()
   userId?: string;
 }
