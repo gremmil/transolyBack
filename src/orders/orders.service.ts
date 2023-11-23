@@ -98,6 +98,22 @@ export class OrdersService {
     }
   }
 
+  async findAllStatics(): Promise<Array<{ count: number, companyDescripcion: string }>> {
+    try {
+      const queryBuilder = this.orderRepository.createQueryBuilder('order')
+        .select('COUNT(order.id)', 'count')
+        .addSelect('company.description', 'companyDescripcion')
+        .innerJoin('order.company', 'company')
+        .groupBy('company.id')
+        .orderBy('count', 'DESC');
+
+      return await queryBuilder.getRawMany();
+    } catch (error) {
+      console.log('Error en el método findAllStatics:', error);
+      throw error;
+    }
+  }
+
 
   async findOne(dto: FindOneOrderDto) {
     try {

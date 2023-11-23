@@ -24,6 +24,11 @@ export class OrdersController {
     return this.ordersService.findAll(paginationDto);
   }
 
+  @Get('getAllStatics')
+  findAllStatics() {
+    return this.ordersService.findAllStatics();
+  }
+
   @ApiOperation({ summary: 'Obtener Pedido por id/numero_orden/empresa_id' })
   @Get('getOne')
   findOne(@Query() query: FindOneOrderDto) {
